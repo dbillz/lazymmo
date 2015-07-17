@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="phaser.min.js"></script>        
+        <script src="src/menu.js"></script>
+        <script src="src/preload.js"></script>
+        <script src="src/mainGame.js"></script>
+        
+        <style>
+            body{margin:0}
+        </style>
+        
+        <script>
+            (function(){
+                
+                var game = new Phaser.Game(800,800,Phaser.CANVAS,"lazyMMO");
+                
+                
+                //put public variables here
+                game.gold = 0;
+                game.playerName = "dickmunch";
+                
+                game.state.add("Preload",preload);
+                game.state.add("Menu",menu);
+                game.state.add("MainGame",mainGame);
+                
+                game.state.start("Preload");
+                
+            })();
+        </script>
+        
+        
+        
+        
+    </head>
+    <body>
+        
+    </body>
+    
+</html>
