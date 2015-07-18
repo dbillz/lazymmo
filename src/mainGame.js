@@ -23,7 +23,6 @@ var mainGame = function(game){
     
     this.questButton;
     this.questResultDisplay;
-    this.goldTextDisplay;
     this.xpTextDisplay;
     this.levelTextDisplay;
     
@@ -33,6 +32,18 @@ var mainGame = function(game){
     this.currentXp = 0;
     this.currentCoins = 0;
     this.currentLevel = 1;
+    
+    
+    this.copperSprite;
+    this.copperText;
+    this.silverSprite;
+    this.silverText;
+    this.goldSprite;
+    this.goldText;
+    this.gemSprite;
+    this.gemText;
+    
+    this.xpToLevel = 0;
 }
 
 mainGame.prototype = {
@@ -43,14 +54,28 @@ mainGame.prototype = {
     
     create:function(){
         this.player = this.createPlayer();
-        var chestSprite = this.game.add.sprite(200,200,this.getSpritesheetForItem(this.player.equipment[this.CHEST_SLOT]));
-        chestSprite.frame = 0;
+      
         this.lastQuestTime = this.game.time.now;
         this.questResultDisplay = this.game.add.text(0,350," ",this.textStyle);
-        this.levelTextDisplay = this.game.add.text(0,0,"Level: 1",this.textStyle);
-        this.goldTextDisplay = this.game.add.text(200, 0,"Gold: 0",this.textStyle);
-        this.xpTextDisplay = this.game.add.text(500,0,"XP: 0",this.textStyle);
+        this.levelTextDisplay = this.game.add.text(0,0,"Level: 0000",this.textStyle);
+        
+        this.copperSprite = this.game.add.sprite(0,40,'coins');
+        this.copperSprite.frame = 0;
+        this.copperText = this.game.add.text(40,40,"000",this.textStyle);
+        this.silverSprite = this.game.add.sprite(100,40,'coins');
+        this.silverSprite.frame = 1;
+        this.silverText = this.game.add.text(140,40,"000",this.textStyle);
+        this.goldSprite = this.game.add.sprite(200,40,'coins');
+        this.goldSprite.frame = 2;
+        this.goldText = this.game.add.text(240,40,"000",this.textStyle);
+        this.gemSprite = this.game.add.sprite(300,40,'coins');
+        this.gemSprite.frame = 3;
+        this.gemText = this.game.add.text(340,40,"000",this.textStyle);
+        
+        this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
         this.questButton = this.game.add.button(400,250,'questButton', this.doQuest, this,3,2,1);
+        this.xpToLevel = this.getXpNeeded(1);
+        this.updateTextDisplays();
     },
     
     update: function(){
@@ -135,7 +160,7 @@ mainGame.prototype = {
     
     doQuest: function(){
         var xpEarned = Math.floor(Math.random()*10);
-        var coinEarned = Math.floor(Math.random()*5);
+        var coinEarned = Math.floor(Math.random()*5*this.currentLevel);
         this.currentXp += xpEarned;
         this.currentCoins += coinEarned;
         this.questResultDisplay.text =  "Found " + coinEarned + " coins and earned " + xpEarned + " xp on the quest!";
@@ -146,16 +171,62 @@ mainGame.prototype = {
     },
     
     updateTextDisplays: function(){
-        this.xpTextDisplay.text = "XP: " + this.currentXp;
-        this.goldTextDisplay.text = "Coins: " + this.currentCoins;
+        this.xpTextDisplay.text = "XP: " + this.currentXp + "/" + this.getXpNeeded(this.currentLevel);
         this.levelTextDisplay.text = "Level: " + this.currentLevel;
+        
+        var displayMoney = this.currentCoins;
+        
+        var silverValue = 100;
+        var goldValue = silverValue * 1000;
+        var gemValue = goldValue * 10000;
+    
+        if(displayMoney > gemValue){
+            this.gemSprite.visible = true;
+            this.gemText.visible = true;
+            this.gemText.text = Math.floor(displayMoney/gemValue);
+            displayMoney = displayMoney % gemValue;
+        }
+        else{
+            this.gemSprite.visible = false;
+            this.gemText.visible = false;
+        }
+        
+        if(displayMoney > goldValue){
+            this.goldSprite.visible = true;
+            this.goldText.visible = true;
+            this.goldText.text = Math.floor(displayMoney/goldValue);
+            displayMoney = displayMoney % goldValue;
+        }
+        else{
+            this.goldSprite.visible = false;
+            this.goldText.visible = false;
+        }
+        
+        if(displayMoney > silverValue){
+            this.silverSprite.visible = true;
+            this.silverText.visible = true;
+            this.silverText.text = Math.floor(displayMoney/silverValue);
+            displayMoney = displayMoney % silverValue;
+        }
+        else{
+            this.silverSprite.visible = false;
+            this.silverText.visible = false;
+        }
+        
+        this.copperText.text = displayMoney;
+        
     },
     
     checkLevelUp: function(){
-        if(this.currentXp > 100){
+        if(this.currentXp > this.xpToLevel){
+            this.currentXp -= this.xpToLevel;
             this.currentLevel++;
-            this.currentXp -= 100;
+            this.xpToLevel = this.getXpNeeded(this.currentLevel);
         }
+    },
+    
+    getXpNeeded: function(currentLevel){
+        return (currentLevel * 100 );
     },
     
     resetQuestText: function(){
