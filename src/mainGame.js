@@ -44,6 +44,7 @@ var mainGame = function(game){
     this.gemText;
     
     this.xpToLevel = 0;
+    this.inventorySprites = {};
 }
 
 mainGame.prototype = {
@@ -118,9 +119,51 @@ mainGame.prototype = {
         } 
     },
     
+    addItem: function(item){
+        this.player.inventory.push(item);
+        this.drawEquipment();
+    },
+    
+    createRandomItem: function(minRarity, maxRarity){
+        var rarity;
+        var rarityRoll = Math.floor(Math.random()*100);
+        
+        if(rarityRoll < 75){
+            rarity = minRarity;
+        }
+        else if(rarityRoll < 90){
+            rarity = Math.min(minRarity+1, maxRarity);
+        }
+        else if(rarityRoll < 99){
+            rarity = Math.min(minRarity+2, maxRarity);
+        }
+        else{
+            rarity = Math.min(minRarity+3, maxRarity);
+        }
+        
+        console.log(rarity);
+        var slot = Math.floor(Math.random()*12);
+        console.log(slot);
+        switch(slot){
+            case 0: return this.createItem(this.BACK_SLOT,rarity); break;
+            case 1: return this.createItem(this.BELT_SLOT,rarity);break;
+            case 2: return this.createItem(this.CHEST_SLOT,rarity);break;
+            case 3: return this.createItem(this.FOOT_SLOT,rarity);break;
+            case 4: return this.createItem(this.HAND_SLOT,rarity);break;
+            case 5: return this.createItem(this.HEAD_SLOT,rarity);break;
+            case 6: return this.createItem(this.LEG_SLOT,rarity);break;
+            case 7: return this.createItem(this.NECK_SLOT,rarity);break;
+            case 8: return this.createItem(this.RING_SLOT,rarity);break;
+            case 9: return this.createItem(this.SHOULDER_SLOT,rarity);break;
+            case 10: return this.createItem(this.WEAPON_SLOT,rarity);break;
+            case 11: return this.createItem(this.WRIST_SLOT,rarity);break;
+        }
+    },
+    
     createItem: function(slot, rarity){
         var item = {};
         item.slot = slot;
+        item.rarityInt = rarity;
         switch(rarity){
             case 0: item.rarity = this.COMMON_RARITY; break;
             case 1: item.rarity = this.UNCOMMON_RARITY; break;
@@ -142,7 +185,7 @@ mainGame.prototype = {
             case this.BELT_SLOT: spritesheet = "waists0"; break;
             case this.CHEST_SLOT: spritesheet = "chests0"; break;
             case this.FOOT_SLOT: spritesheet = "feet0"; break;
-            case this.SHOULDER_SLOT: spritesheet = "shoulder0"; break;
+            case this.SHOULDER_SLOT: spritesheet = "shoulders0"; break;
             case this.HAND_SLOT: spritesheet = "hands0"; break;
             case this.LEG_SLOT: spritesheet = "legs0"; break;
             case this.WRIST_SLOT: spritesheet = "wrists0"; break;
@@ -155,15 +198,42 @@ mainGame.prototype = {
     
     
     drawEquipment: function(){
+        var initialxLoc = 0;
+        var xLoc = initialxLoc;
+        var yLoc = 500;
+        var maxXLoc = xLoc + 64*10;
+        
+        this.inventorySprites = {};
+        for(var i = 0; i < this.player.inventory.length; i++){
+            this.inventorySprites[i] = this.game.add.sprite(xLoc,yLoc,this.getSpritesheetForItem(this.player.inventory[i]));
+            this.inventorySprites[i].frame = this.player.inventory[i].rarityInt;
+            xLoc += 64;
+            if(xLoc > maxXLoc){
+                xLoc = initialxLoc;
+                yLoc+=64;
+            }
+        }
         
     },
     
     doQuest: function(){
         var xpEarned = Math.floor(Math.random()*10);
         var coinEarned = Math.floor(Math.random()*5*this.currentLevel);
+        var lootChance = 100;
+        var lootRoll = Math.floor(Math.random()*lootChance);
         this.currentXp += xpEarned;
         this.currentCoins += coinEarned;
-        this.questResultDisplay.text =  "Found " + coinEarned + " coins and earned " + xpEarned + " xp on the quest!";
+        
+        if(lootRoll == 0){
+            var newItem = this.createRandomItem(0,3);
+            this.questResultDisplay.text =  "Got " + coinEarned + " coins and " + xpEarned + " XP\n Loot: " + newItem.rarity + " "+ newItem.slot;
+            this.addItem(newItem);
+        }
+        else{
+            this.questResultDisplay.text =  "Got " + coinEarned + " coins and " + xpEarned + " XP";
+        }
+        
+        
         this.lastQuestTime = this.game.time.now;
         this.checkLevelUp();
         this.updateTextDisplays();
