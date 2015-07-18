@@ -14,13 +14,12 @@ var mainGame = function(game){
     this.RING_SLOT = 'ring';
     this.HAND_SLOT = 'hand';
     this.SHOULDER_SLOT = 'shoulder';
+    this.WRIST_SLOT = 'wrist';
     
     this.COMMON_RARITY = 'common';
     this.UNCOMMON_RARITY = 'uncommon';
     this.RARE_RARITY = 'rare';
     this.EPIC_RARITY = 'epic';
-    
-    
 }
 
 mainGame.prototype = {
@@ -32,6 +31,8 @@ mainGame.prototype = {
     create:function(){
         this.game.add.text(10,10,this.textShown, this.textStyle);
         this.player = this.createPlayer();
+        var chestSprite = this.game.add.sprite(200,200,this.getSpritesheetForItem(this.player.equipment[this.CHEST_SLOT]));
+        chestSprite.frame = 2;
     },
     
     update: function(){
@@ -82,7 +83,31 @@ mainGame.prototype = {
         return item;
     },
     
-    getSpriteForItem: function(item){
+    //I'm not happy with how this function works right now,
+    //it won't really work like this once there are more items
+    //items should have a unique ID number that gets looked up in some table
+    //this has a single sheet per slot
+    getSpritesheetForItem: function(item){
+        var spritesheet;
+        switch(item.slot){
+            case this.HEAD_SLOT: spritesheet = "heads0"; break;
+            case this.BACK_SLOT: spritesheet = "backs0"; break;
+            case this.BELT_SLOT: spritesheet = "waists0"; break;
+            case this.CHEST_SLOT: spritesheet = "chests0"; break;
+            case this.FOOT_SLOT: spritesheet = "feet0"; break;
+            case this.SHOULDER_SLOT: spritesheet = "shoulder0"; break;
+            case this.HAND_SLOT: spritesheet = "hands0"; break;
+            case this.LEG_SLOT: spritesheet = "legs0"; break;
+            case this.WRIST_SLOT: spritesheet = "wrists0"; break;
+            case this.WEAPON_SLOT: spritesheet = "weapons0"; break;
+            case this.RING_SLOT: spritesheet = "rings0"; break;
+            case this.NECK_SLOT: spritesheet = "necks0"; break;
+        }
+        return spritesheet;
+    },
+    
+    
+    drawEquipment: function(){
         
     }
     
