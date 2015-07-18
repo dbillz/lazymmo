@@ -32,7 +32,7 @@ mainGame.prototype = {
         this.game.add.text(10,10,this.textShown, this.textStyle);
         this.player = this.createPlayer();
         var chestSprite = this.game.add.sprite(200,200,this.getSpritesheetForItem(this.player.equipment[this.CHEST_SLOT]));
-        chestSprite.frame = 2;
+        chestSprite.frame = 0;
     },
     
     update: function(){
