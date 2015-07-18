@@ -1,5 +1,5 @@
 var mainGame = function(game){
-    this.textShown = "hola mundo ";
+    this.game = game;
     this.textStyle = { font: '34px Arial', fill: '#f0f' };
     
     
@@ -20,6 +20,19 @@ var mainGame = function(game){
     this.UNCOMMON_RARITY = 'uncommon';
     this.RARE_RARITY = 'rare';
     this.EPIC_RARITY = 'epic';
+    
+    this.questButton;
+    this.questResultDisplay;
+    this.goldTextDisplay;
+    this.xpTextDisplay;
+    this.levelTextDisplay;
+    
+    this.lastQuestTime;
+    this.QUEST_TEXT_RESET_TIME = 2000;
+    
+    this.currentXp = 0;
+    this.currentCoins = 0;
+    this.currentLevel = 1;
 }
 
 mainGame.prototype = {
@@ -29,14 +42,22 @@ mainGame.prototype = {
     },
     
     create:function(){
-        this.game.add.text(10,10,this.textShown, this.textStyle);
         this.player = this.createPlayer();
         var chestSprite = this.game.add.sprite(200,200,this.getSpritesheetForItem(this.player.equipment[this.CHEST_SLOT]));
         chestSprite.frame = 0;
+        this.lastQuestTime = this.game.time.now;
+        this.questResultDisplay = this.game.add.text(0,350," ",this.textStyle);
+        this.levelTextDisplay = this.game.add.text(0,0,"Level: 1",this.textStyle);
+        this.goldTextDisplay = this.game.add.text(200, 0,"Gold: 0",this.textStyle);
+        this.xpTextDisplay = this.game.add.text(500,0,"XP: 0",this.textStyle);
+        this.questButton = this.game.add.button(400,250,'questButton', this.doQuest, this,3,2,1);
     },
     
     update: function(){
-        
+        if(this.game.time.now > (this.lastQuestTime + this.QUEST_TEXT_RESET_TIME)){
+            this.resetQuestText();
+            console.log("reset");
+        }
     },
     
     createPlayer: function(){
@@ -68,6 +89,7 @@ mainGame.prototype = {
     unequipItem: function(slot){
         if(typeof this.player.equipment[slot] != 'undefined' && this.player.equipment[slot] != null){
             this.player.inventory.push(this.player.equipment[slot]);
+            
         } 
     },
     
@@ -109,6 +131,35 @@ mainGame.prototype = {
     
     drawEquipment: function(){
         
+    },
+    
+    doQuest: function(){
+        var xpEarned = Math.floor(Math.random()*10);
+        var coinEarned = Math.floor(Math.random()*5);
+        this.currentXp += xpEarned;
+        this.currentCoins += coinEarned;
+        this.questResultDisplay.text =  "Found " + coinEarned + " coins and earned " + xpEarned + " xp on the quest!";
+        this.lastQuestTime = this.game.time.now;
+        this.checkLevelUp();
+        this.updateTextDisplays();
+        this.questButton.frame = 3;
+    },
+    
+    updateTextDisplays: function(){
+        this.xpTextDisplay.text = "XP: " + this.currentXp;
+        this.goldTextDisplay.text = "Coins: " + this.currentCoins;
+        this.levelTextDisplay.text = "Level: " + this.currentLevel;
+    },
+    
+    checkLevelUp: function(){
+        if(this.currentXp > 100){
+            this.currentLevel++;
+            this.currentXp -= 100;
+        }
+    },
+    
+    resetQuestText: function(){
+        this.questResultDisplay.text = "";
     }
     
 }

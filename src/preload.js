@@ -17,6 +17,8 @@ preload.prototype = {
         this.game.load.spritesheet('necks0','assets/necklaces.png',64,64);
         this.game.load.spritesheet('weapons0','assets/spear.png',64,64);
         this.game.load.spritesheet('rings0','assets/rings.png',64,64);
+        
+        this.game.load.spritesheet('questButton','assets/questbutton.png',128,64);
     },
     create:function(){
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
