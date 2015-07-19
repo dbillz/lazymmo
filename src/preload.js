@@ -19,6 +19,7 @@ preload.prototype = {
         this.game.load.spritesheet('rings0','assets/rings.png',64,64);
         
         this.game.load.spritesheet('questButton','assets/questbutton.png',128,64);
+        this.game.load.spritesheet('sellButton', 'assets/sellAll.png',128,64);
         this.game.load.spritesheet('coins','assets/coins.png',32,32);
     },
     create:function(){

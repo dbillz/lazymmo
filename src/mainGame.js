@@ -22,6 +22,7 @@ var mainGame = function(game){
     this.EPIC_RARITY = 'epic';
     
     this.questButton;
+    this.sellButton;
     this.questResultDisplay;
     this.xpTextDisplay;
     this.levelTextDisplay;
@@ -46,13 +47,15 @@ var mainGame = function(game){
     this.xpToLevel = 0;
     this.inventorySprites = {};
     
-    this.inventorySize = 72;
+    this.inventorySize = 60;
     
     this.equippedItemSprites = {};
     
     this.itemSlots = [this.HEAD_SLOT,this.NECK_SLOT,this.CHEST_SLOT,this.BELT_SLOT,this.LEG_SLOT,this.FOOT_SLOT,this.SHOULDER_SLOT,this.WRIST_SLOT,this.HAND_SLOT,this.WEAPON_SLOT,this.BACK_SLOT,this.RING_SLOT];
 
     this.equipmentString;
+    
+    this.itemLevelDisplay;
     
     
 }
@@ -83,8 +86,11 @@ mainGame.prototype = {
         this.gemSprite.frame = 3;
         this.gemText = this.game.add.text(340,40,"000",this.textStyle);
         
+        this.itemLevelDisplay = this.game.add.text(300,50,"Item level: 0", this.textStyle);
+        
         this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
-        this.questButton = this.game.add.button(400,250,'questButton', this.doQuest, this,3,2,1);
+        this.questButton = this.game.add.button(600,700,'questButton', this.doQuest, this,3,2,1);
+        this.sellButton = this.game.add.button(100,700,'sellButton',this.sellAll, this,2,1,0);
         this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
         this.updateEquippedItemsSprites();
@@ -123,6 +129,7 @@ mainGame.prototype = {
         this.removeItem(item);
         this.updateEquippedItemsSprites();
         this.drawEquipment();
+        this.updateTextDisplays();
     },
     
     inventoryItemClick: function(itemSprite, pointer){
@@ -168,6 +175,16 @@ mainGame.prototype = {
       this.currentCoins += value;
       this.removeItem(item);
       this.updateTextDisplays();
+    },
+    
+    sellAll: function(){
+        var startingGold = this.currentCoins;
+        while(this.player.inventory.length > 0){
+            this.sellItem(this.player.inventory[0]);
+        }
+        var gainedGold = this.currentCoins - startingGold;
+        this.questResultDisplay.text = "Sold inventory for " + gainedGold + " coins!";
+        this.lastQuestTime = this.game.time.now;
     },
     
     removeItem: function(item){
@@ -225,6 +242,17 @@ mainGame.prototype = {
         return item;
     },
     
+    getItemLevel: function(){
+        var itemLevel = 0;
+        for(var i = 0; i < this.itemSlots.length; i++){
+            var thisSlot = this.itemSlots[i];
+            if(typeof this.player.equipment[thisSlot] != 'undefined' && this.player.equipment[thisSlot] != null){
+                itemLevel += this.player.equipment[thisSlot].rarityInt+1;
+            }
+        }
+        return itemLevel;
+    },
+    
     //I'm not happy with how this function works right now,
     //it won't really work like this once there are more items
     //items should have a unique ID number that gets looked up in some table
@@ -279,10 +307,10 @@ mainGame.prototype = {
         var coinEarned = Math.floor(Math.random()*5*this.currentLevel);
         var lootChance = 20;
         var improvedChance = 100;
-        var epicChance = 1000;
+        var epicChance = 10000;
         var lootRoll = Math.floor(Math.random()*lootChance);
         var improvedRoll = Math.floor(Math.random()*improvedChance);
-        var epicRoll = Math.floor(Math.random()*lootChance);
+        var epicRoll = Math.floor(Math.random()*epicChance);
         this.currentXp += xpEarned;
         this.currentCoins += coinEarned;
         
@@ -295,12 +323,12 @@ mainGame.prototype = {
         }
         else if(improvedRoll == 0){
             console.log("Improved roll");
-            var newItem = this.createRandomItem(1,3);
+            var newItem = this.createRandomItem(1,2);
             this.questResultDisplay.text =  "Got " + coinEarned + " coins, " + xpEarned + " XP and Loot: " + newItem.rarity + " "+ newItem.slot;
             this.addItem(newItem);
         }
         else if(lootRoll == 0){
-            var newItem = this.createRandomItem(0,2);
+            var newItem = this.createRandomItem(0,1);
             this.questResultDisplay.text =  "Got " + coinEarned + " coins, " + xpEarned + " XP and Loot: " + newItem.rarity + " "+ newItem.slot;
             this.addItem(newItem);
         }
@@ -318,6 +346,7 @@ mainGame.prototype = {
     updateTextDisplays: function(){
         this.xpTextDisplay.text = "XP: " + this.currentXp + "/" + this.getXpNeeded(this.currentLevel);
         this.levelTextDisplay.text = "Level: " + this.currentLevel;
+        this.itemLevelDisplay.text = "Item Level: " + this.getItemLevel();
         
         var displayMoney = this.currentCoins;
         
