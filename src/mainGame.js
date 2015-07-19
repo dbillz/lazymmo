@@ -45,6 +45,16 @@ var mainGame = function(game){
     
     this.xpToLevel = 0;
     this.inventorySprites = {};
+    
+    this.inventorySize = 72;
+    
+    this.equippedItemSprites = {};
+    
+    this.itemSlots = [this.HEAD_SLOT,this.NECK_SLOT,this.CHEST_SLOT,this.BELT_SLOT,this.LEG_SLOT,this.FOOT_SLOT,this.SHOULDER_SLOT,this.WRIST_SLOT,this.HAND_SLOT,this.WEAPON_SLOT,this.BACK_SLOT,this.RING_SLOT];
+
+    this.equipmentString;
+    
+    
 }
 
 mainGame.prototype = {
@@ -77,12 +87,14 @@ mainGame.prototype = {
         this.questButton = this.game.add.button(400,250,'questButton', this.doQuest, this,3,2,1);
         this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
+        this.updateEquippedItemsSprites();
+        
+        this.equipmentString = this.game.add.text(550,0,"Equipped items",this.textStyle);
     },
     
     update: function(){
         if(this.game.time.now > (this.lastQuestTime + this.QUEST_TEXT_RESET_TIME)){
             this.resetQuestText();
-            console.log("reset");
         }
     },
     
@@ -96,7 +108,6 @@ mainGame.prototype = {
         player.equipment[this.CHEST_SLOT] = this.createItem(this.CHEST_SLOT,0);
         player.equipment[this.LEG_SLOT] = this.createItem(this.LEG_SLOT,0);
         player.equipment[this.WEAPON_SLOT] = this.createItem(this.WEAPON_SLOT,0);
-        
         player.inventory = [];
         return player;
     },
@@ -109,41 +120,82 @@ mainGame.prototype = {
         } 
         //Then place the item in the newly empty slot
         this.player.equipment[item.slot] = item;
-        
+        this.removeItem(item);
+        this.updateEquippedItemsSprites();
+        this.drawEquipment();
     },
+    
+    inventoryItemClick: function(itemSprite, pointer){
+        
+        if(this.game.input.mouse.button==2){
+            this.sellItem(itemSprite.item);
+        }
+        else{
+            this.equipItem(itemSprite.item);
+        }
+    },
+    
     
     unequipItem: function(slot){
         if(typeof this.player.equipment[slot] != 'undefined' && this.player.equipment[slot] != null){
+            console.log("pushed " + this.player.equipment[slot].rarity + " " +  this.player.equipment[slot].slot + "  to inventory");
             this.player.inventory.push(this.player.equipment[slot]);
-            
+            console.log("Inventory size is " + this.player.inventory.length);
         } 
     },
     
     addItem: function(item){
-        this.player.inventory.push(item);
+        if(this.player.inventory.length < this.inventorySize){
+            this.player.inventory.push(item);
+            this.drawEquipment();
+        }
+        else{
+            console.log("Couldn't add item! Item destroyed. Sucks to be you!");
+        }
+        
+    },
+    
+    sellItem: function(item){
+      var value = 0;
+      switch(item.rarityInt){
+          case 0: value = Math.floor(Math.random()*80 + 20); break;
+          case 1: value = Math.floor(Math.random()*900 + 100); break;
+          case 2: value = Math.floor(Math.random()*8000 + 2000); break;
+          case 3: value = Math.floor(Math.random()*90000 + 10000); break;
+      }
+       this.questResultDisplay.text =  "Sold item for " + value + " coins!";
+       this.lastQuestTime = this.game.time.now;
+      this.currentCoins += value;
+      this.removeItem(item);
+      this.updateTextDisplays();
+    },
+    
+    removeItem: function(item){
+        var index = this.player.inventory.indexOf(item);
+        if(index > -1){
+            this.player.inventory.splice(index,1);
+        }
         this.drawEquipment();
     },
     
     createRandomItem: function(minRarity, maxRarity){
         var rarity;
-        var rarityRoll = Math.floor(Math.random()*100);
+        var rarityRoll = Math.floor(Math.random()*1000)+1;
         
-        if(rarityRoll < 75){
+        if(rarityRoll < 750){
             rarity = minRarity;
         }
-        else if(rarityRoll < 90){
+        else if(rarityRoll < 900){
             rarity = Math.min(minRarity+1, maxRarity);
         }
-        else if(rarityRoll < 99){
+        else if(rarityRoll < 999){
             rarity = Math.min(minRarity+2, maxRarity);
         }
         else{
             rarity = Math.min(minRarity+3, maxRarity);
         }
         
-        console.log(rarity);
         var slot = Math.floor(Math.random()*12);
-        console.log(slot);
         switch(slot){
             case 0: return this.createItem(this.BACK_SLOT,rarity); break;
             case 1: return this.createItem(this.BELT_SLOT,rarity);break;
@@ -200,13 +252,19 @@ mainGame.prototype = {
     drawEquipment: function(){
         var initialxLoc = 0;
         var xLoc = initialxLoc;
-        var yLoc = 500;
-        var maxXLoc = xLoc + 64*10;
+        var yLoc = 400;
+        var maxXLoc = xLoc + 64*11;
         
-        this.inventorySprites = {};
+        for(var i = 0; i < this.inventorySprites.length; i++){
+            this.inventorySprites[i].kill();
+        }
+        this.inventorySprites = [];
         for(var i = 0; i < this.player.inventory.length; i++){
             this.inventorySprites[i] = this.game.add.sprite(xLoc,yLoc,this.getSpritesheetForItem(this.player.inventory[i]));
             this.inventorySprites[i].frame = this.player.inventory[i].rarityInt;
+            this.inventorySprites[i].inputEnabled = true;
+            this.inventorySprites[i].events.onInputDown.add(this.inventoryItemClick, this);
+            this.inventorySprites[i].item = this.player.inventory[i];
             xLoc += 64;
             if(xLoc > maxXLoc){
                 xLoc = initialxLoc;
@@ -219,14 +277,31 @@ mainGame.prototype = {
     doQuest: function(){
         var xpEarned = Math.floor(Math.random()*10);
         var coinEarned = Math.floor(Math.random()*5*this.currentLevel);
-        var lootChance = 100;
+        var lootChance = 20;
+        var improvedChance = 100;
+        var epicChance = 1000;
         var lootRoll = Math.floor(Math.random()*lootChance);
+        var improvedRoll = Math.floor(Math.random()*improvedChance);
+        var epicRoll = Math.floor(Math.random()*lootChance);
         this.currentXp += xpEarned;
         this.currentCoins += coinEarned;
         
-        if(lootRoll == 0){
-            var newItem = this.createRandomItem(0,3);
-            this.questResultDisplay.text =  "Got " + coinEarned + " coins and " + xpEarned + " XP\n Loot: " + newItem.rarity + " "+ newItem.slot;
+        
+        if(epicRoll == 0){
+            console.log("Epic roll!");
+            var newItem = this.createRandomItem(2,3);
+            this.questResultDisplay.text =  "Got " + coinEarned + " coins, " + xpEarned + " XP and Loot: " + newItem.rarity + " "+ newItem.slot;
+            this.addItem(newItem);
+        }
+        else if(improvedRoll == 0){
+            console.log("Improved roll");
+            var newItem = this.createRandomItem(1,3);
+            this.questResultDisplay.text =  "Got " + coinEarned + " coins, " + xpEarned + " XP and Loot: " + newItem.rarity + " "+ newItem.slot;
+            this.addItem(newItem);
+        }
+        else if(lootRoll == 0){
+            var newItem = this.createRandomItem(0,2);
+            this.questResultDisplay.text =  "Got " + coinEarned + " coins, " + xpEarned + " XP and Loot: " + newItem.rarity + " "+ newItem.slot;
             this.addItem(newItem);
         }
         else{
@@ -247,8 +322,8 @@ mainGame.prototype = {
         var displayMoney = this.currentCoins;
         
         var silverValue = 100;
-        var goldValue = silverValue * 1000;
-        var gemValue = goldValue * 10000;
+        var goldValue = silverValue * 100;
+        var gemValue = goldValue * 100;
     
         if(displayMoney > gemValue){
             this.gemSprite.visible = true;
@@ -301,6 +376,28 @@ mainGame.prototype = {
     
     resetQuestText: function(){
         this.questResultDisplay.text = "";
+    },
+    
+    
+    updateEquippedItemsSprites: function(){
+        this.equippedItemSprites = [];
+        var xLoc = 600;
+        var initialXLoc = xLoc;
+        var maxXLoc = xLoc + 64*3;
+        var yLoc = 50;
+        for(var i = 0; i < this.itemSlots.length; i++){
+            var thisSlot = this.itemSlots[i];
+            if(typeof this.player.equipment[thisSlot] != 'undefined' && this.player.equipment[thisSlot] != null){
+                var equippedItemSprite = this.game.add.sprite(xLoc,yLoc,this.getSpritesheetForItem(this.player.equipment[thisSlot]));
+                equippedItemSprite.frame = this.player.equipment[thisSlot].rarityInt;
+                this.equippedItemSprites.push(equippedItemSprite);
+                xLoc += 64;
+                if(xLoc >= maxXLoc){
+                    xLoc = initialXLoc;
+                    yLoc += 64;
+                }
+            }
+        }
     }
     
 }
