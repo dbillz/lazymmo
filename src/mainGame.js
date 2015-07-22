@@ -522,6 +522,7 @@ mainGame.prototype = {
             button.key = 'epicQuests';
             button.rarity = 'purple';
             button.setFrames( epicIndex, epicIndex, epicIndex);
+            console.log("Epic quest button created!");
         }
         else if(blueRoll > 90){
             var blueIndex = Math.floor(Math.random()*this.N_BLUE_QUESTS);
