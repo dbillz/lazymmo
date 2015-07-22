@@ -1,6 +1,6 @@
 var mainGame = function(game){
     this.game = game;
-    this.textStyle = { font: '34px Arial', fill: '#f0f' };
+    this.textStyle = { font: '34px Arial', fill: '#fff' };
     
     
     this.HEAD_SLOT = 'head';
@@ -57,7 +57,14 @@ var mainGame = function(game){
     
     this.itemLevelDisplay;
     
+    this.epicAnimation;
+    this.levelSprite;
+    this.inventorySprite;
     
+    this.lastAnimationTime;
+    this.ANIMATION_RESET_TIME = 1000;
+    
+    this.xpBar;
 }
 
 mainGame.prototype = {
@@ -71,7 +78,8 @@ mainGame.prototype = {
       
         this.lastQuestTime = this.game.time.now;
         this.questResultDisplay = this.game.add.text(0,350," ",this.textStyle);
-        this.levelTextDisplay = this.game.add.text(0,0,"Level: 0000",this.textStyle);
+        this.levelSprite = this.game.add.sprite(0,0,'levelSprite');
+        this.levelTextDisplay = this.game.add.text(140,3,"0000",this.textStyle);
         
         this.copperSprite = this.game.add.sprite(0,40,'coins');
         this.copperSprite.frame = 0;
@@ -86,22 +94,36 @@ mainGame.prototype = {
         this.gemSprite.frame = 3;
         this.gemText = this.game.add.text(340,40,"000",this.textStyle);
         
-        this.itemLevelDisplay = this.game.add.text(300,50,"Item level: 0", this.textStyle);
+       //this.itemLevelDisplay = this.game.add.text(300,50,"Item level: 0", this.textStyle);
         
-        this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
-        this.questButton = this.game.add.button(600,700,'questButton', this.doQuest, this,3,2,1);
-        this.sellButton = this.game.add.button(100,700,'sellButton',this.sellAll, this,2,1,0);
-        this.xpToLevel = this.getXpNeeded(1);
+       // this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
+        this.questButton = this.game.add.button(600,730,'questButton', this.doQuest, this,3,2,1);
+        this.sellButton = this.game.add.button(100,730,'sellButton',this.sellAll, this,2,1,0);
+        //this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
         this.updateEquippedItemsSprites();
         
-        this.equipmentString = this.game.add.text(550,0,"Equipped items",this.textStyle);
+        this.xpBar = this.game.add.sprite(200,0,'xpBar');
+        
+        this.inventorySprite = this.game.add.sprite(540,0,'inventorySprite');
+        
+        this.epicAnimation = this.game.add.sprite(50,50,'epicAnimation');
+        this.epicAnimation.frame = 3;
+        this.epicAnimation.visible = false;
+        this.lastAnimationTime = this.game.time.now;
+        this.epicAnimation.animations.add('shine');
+        
+        this.playEpicAnimation();
+        
+        
     },
     
     update: function(){
         if(this.game.time.now > (this.lastQuestTime + this.QUEST_TEXT_RESET_TIME)){
             this.resetQuestText();
         }
+        this.checkResetAnimations();
+        this.updateXpDisplay();
     },
     
     createPlayer: function(){
@@ -213,6 +235,8 @@ mainGame.prototype = {
         }
         
         var slot = Math.floor(Math.random()*12);
+        
+        if(rarity == 3) this.playEpicAnimation();
         switch(slot){
             case 0: return this.createItem(this.BACK_SLOT,rarity); break;
             case 1: return this.createItem(this.BELT_SLOT,rarity);break;
@@ -344,9 +368,9 @@ mainGame.prototype = {
     },
     
     updateTextDisplays: function(){
-        this.xpTextDisplay.text = "XP: " + this.currentXp + "/" + this.getXpNeeded(this.currentLevel);
-        this.levelTextDisplay.text = "Level: " + this.currentLevel;
-        this.itemLevelDisplay.text = "Item Level: " + this.getItemLevel();
+       // this.xpTextDisplay.text = "XP: " + this.currentXp + "/" + this.getXpNeeded(this.currentLevel);
+        this.levelTextDisplay.text = this.currentLevel;
+        //this.itemLevelDisplay.text = "iLvl: " + this.getItemLevel();
         
         var displayMoney = this.currentCoins;
         
@@ -427,6 +451,34 @@ mainGame.prototype = {
                 }
             }
         }
+    },
+    
+    playEpicAnimation: function(){
+        this.lastAnimationTime = this.game.time.now;
+        this.epicAnimation.visible = true;
+        this.epicAnimation.play('shine',20,false);
+    },
+    
+    isAnimationsVisible: function(){
+        if(this.epicAnimation.visible == true)
+            return true;
+        else return false;
+    },
+    
+    checkResetAnimations: function(){
+        if(this.isAnimationsVisible() && this.game.time.now > this.lastAnimationTime + this.ANIMATION_RESET_TIME){
+            this.resetAnimations();
+        }
+    },
+    
+    resetAnimations: function(){
+        this.epicAnimation.visible = false;
+    },
+    
+    updateXpDisplay: function(){
+        var xpNeeded = this.getXpNeeded(this.currentLevel);
+        var percent = this.currentXp / xpNeeded * 20;
+        this.xpBar.frame = Math.floor(percent);
     }
     
 }
