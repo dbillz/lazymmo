@@ -27,6 +27,7 @@ preload.prototype = {
         this.game.load.image('levelSprite','assets/level128width.png');
         this.game.load.spritesheet('epicAnimation','assets/epicspritesheet640x400.png',640,400);
         this.game.load.spritesheet('xpBar','assets/xpbar.png',256,64);
+        this.game.load.spritesheet('greenQuests','assets/greenQuests200x80.png',200,80);
         console.log("Loading completed");
     },
     create:function(){

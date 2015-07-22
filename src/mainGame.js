@@ -21,7 +21,8 @@ var mainGame = function(game){
     this.RARE_RARITY = 'rare';
     this.EPIC_RARITY = 'epic';
     
-    this.questButton;
+    this.rightQuestButton;
+    this.leftQuestButton;
     this.sellButton;
     this.questResultDisplay;
     this.xpTextDisplay;
@@ -65,6 +66,8 @@ var mainGame = function(game){
     this.ANIMATION_RESET_TIME = 1000;
     
     this.xpBar;
+    
+    this.N_GREEN_QUESTS = 39;
 }
 
 mainGame.prototype = {
@@ -97,7 +100,8 @@ mainGame.prototype = {
        //this.itemLevelDisplay = this.game.add.text(300,50,"Item level: 0", this.textStyle);
         
        // this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
-        this.questButton = this.game.add.button(650,730,'questButton', this.doQuest, this,3,2,1);
+        this.leftQuestButton = this.game.add.button(350,715,'greenQuests', this.doQuest, this,0,0,0);
+        this.rightQuestButton = this.game.add.button(570,715,'greenQuests', this.doQuest, this,1,1,1);
         this.sellButton = this.game.add.button(20,730,'sellButton',this.sellAll, this,2,1,0);
         //this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
@@ -114,7 +118,7 @@ mainGame.prototype = {
         this.epicAnimation.animations.add('shine');
         
         this.playEpicAnimation();
-        
+        this.randomizeQuestButtons();
         
     },
     
@@ -364,7 +368,8 @@ mainGame.prototype = {
         this.lastQuestTime = this.game.time.now;
         this.checkLevelUp();
         this.updateTextDisplays();
-        this.questButton.frame = 3;
+       // this.questButton.frame = 3;
+        this.randomizeQuestButtons();
     },
     
     updateTextDisplays: function(){
@@ -479,6 +484,13 @@ mainGame.prototype = {
         var xpNeeded = this.getXpNeeded(this.currentLevel);
         var percent = this.currentXp / xpNeeded * 20;
         this.xpBar.frame = Math.floor(percent);
+    },
+    
+    randomizeQuestButtons: function(){
+        var randomOne = Math.floor(Math.random()*this.N_GREEN_QUESTS);
+        var randomTwo = Math.floor(Math.random()*this.N_GREEN_QUESTS);
+        this.leftQuestButton.setFrames(randomOne,randomOne,randomOne);
+        this.rightQuestButton.setFrames(randomTwo,randomTwo,randomTwo);
     }
     
 }
