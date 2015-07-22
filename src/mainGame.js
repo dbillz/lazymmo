@@ -24,7 +24,7 @@ var mainGame = function(game){
     this.rightQuestButton;
     this.leftQuestButton;
     this.sellButton;
-    this.questResultDisplay;
+   // this.questResultDisplay;
     this.xpTextDisplay;
     this.levelTextDisplay;
     
@@ -84,7 +84,7 @@ mainGame.prototype = {
         this.player = this.createPlayer();
       
         this.lastQuestTime = this.game.time.now;
-        this.questResultDisplay = this.game.add.text(0,690," ",this.textStyle);
+        //this.questResultDisplay = this.game.add.text(0,690," ",this.textStyle);
         this.levelSprite = this.game.add.sprite(0,0,'levelSprite');
         this.levelTextDisplay = this.game.add.text(140,3,"0000",this.textStyle);
         
@@ -108,7 +108,7 @@ mainGame.prototype = {
         this.leftQuestButton.rarity = 'green';
         this.rightQuestButton = this.game.add.button(570,715,'greenQuests', this.doQuest, this,1,1,1);
         this.rightQuestButton.rarity = 'green';
-        this.sellButton = this.game.add.button(20,730,'sellButton',this.sellAll, this,2,1,0);
+        this.sellButton = this.game.add.button(10,715,'sellButton',this.sellAll, this,0,0,0);
         //this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
         this.updateEquippedItemsSprites();
@@ -205,7 +205,7 @@ mainGame.prototype = {
           case 2: value = Math.floor(Math.random()*8000 + 2000); break;
           case 3: value = Math.floor(Math.random()*90000 + 10000); break;
       }
-       this.questResultDisplay.text =  "Sold item for " + value + " coins!";
+      // this.questResultDisplay.text =  "Sold item for " + value + " coins!";
        this.lastQuestTime = this.game.time.now;
       this.currentCoins += value;
       this.removeItem(item);
@@ -218,7 +218,7 @@ mainGame.prototype = {
             this.sellItem(this.player.inventory[0]);
         }
         var gainedGold = this.currentCoins - startingGold;
-        this.questResultDisplay.text = "Sold inventory for " + gainedGold + " coins!";
+        //this.questResultDisplay.text = "Sold inventory for " + gainedGold + " coins!";
         this.lastQuestTime = this.game.time.now;
     },
     
@@ -450,7 +450,7 @@ mainGame.prototype = {
     },
     
     resetQuestText: function(){
-        this.questResultDisplay.text = "";
+        //this.questResultDisplay.text = "";
     },
     
     
