@@ -77,7 +77,7 @@ mainGame.prototype = {
         this.player = this.createPlayer();
       
         this.lastQuestTime = this.game.time.now;
-        this.questResultDisplay = this.game.add.text(0,350," ",this.textStyle);
+        this.questResultDisplay = this.game.add.text(0,690," ",this.textStyle);
         this.levelSprite = this.game.add.sprite(0,0,'levelSprite');
         this.levelTextDisplay = this.game.add.text(140,3,"0000",this.textStyle);
         
@@ -97,13 +97,13 @@ mainGame.prototype = {
        //this.itemLevelDisplay = this.game.add.text(300,50,"Item level: 0", this.textStyle);
         
        // this.xpTextDisplay = this.game.add.text(300,0,"XP: 0",this.textStyle);
-        this.questButton = this.game.add.button(600,730,'questButton', this.doQuest, this,3,2,1);
-        this.sellButton = this.game.add.button(100,730,'sellButton',this.sellAll, this,2,1,0);
+        this.questButton = this.game.add.button(650,730,'questButton', this.doQuest, this,3,2,1);
+        this.sellButton = this.game.add.button(20,730,'sellButton',this.sellAll, this,2,1,0);
         //this.xpToLevel = this.getXpNeeded(1);
         this.updateTextDisplays();
         this.updateEquippedItemsSprites();
         
-        this.xpBar = this.game.add.sprite(200,0,'xpBar');
+        this.xpBar = this.game.add.sprite(200,-32,'xpBar');
         
         this.inventorySprite = this.game.add.sprite(540,0,'inventorySprite');
         
@@ -304,7 +304,7 @@ mainGame.prototype = {
     drawEquipment: function(){
         var initialxLoc = 0;
         var xLoc = initialxLoc;
-        var yLoc = 400;
+        var yLoc = 350;
         var maxXLoc = xLoc + 64*11;
         
         for(var i = 0; i < this.inventorySprites.length; i++){
