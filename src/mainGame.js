@@ -69,6 +69,9 @@ var mainGame = function(game){
     
     this.N_GREEN_QUESTS = 39;
     this.N_BLUE_QUESTS = 20;
+    this.N_EPIC_QUESTS = 6;
+    
+    this.levelUpSprite;
 }
 
 mainGame.prototype = {
@@ -120,8 +123,11 @@ mainGame.prototype = {
         this.lastAnimationTime = this.game.time.now;
         this.epicAnimation.animations.add('shine');
         
-        this.playEpicAnimation();
+        //this.playEpicAnimation();
         this.randomizeQuestButtons();
+        
+        this.levelUpSprite = this.game.add.sprite(50,40,'levelUpSprite');
+        this.levelUpSprite.visible = false;
         
     },
     
@@ -334,36 +340,45 @@ mainGame.prototype = {
     },
     
     doQuest: function(button){
-        var xpEarned = Math.floor(Math.random()*10);
-        var coinEarned = Math.floor(Math.random()*5*this.currentLevel);
+        
+        
+        
         var lootChance = 20;
         var lootRoll = Math.floor(Math.random()*lootChance);
-        this.currentXp += xpEarned;
-        this.currentCoins += coinEarned;
+       
         
-        if(lootRoll == 0){
-            if(button.rarity == 'green'){
+        if(button.rarity == 'green'){
+            if(lootRoll == 0){
                 var newItem = this.createRandomItem(0,1);
                 this.addItem(newItem);
             }
-            else if(button.rarity == 'blue'){
-                console.log("detected blue");
+            else{
+                this.currentXp +=  Math.floor(Math.random()*10);
+                this.currentCoins += Math.floor(Math.random()*5*this.currentLevel);
+            }
+        }
+        else if(button.rarity == 'blue'){
+            if(lootRoll == 0){
                 var newItem = this.createRandomItem(1,2);
                 this.addItem(newItem);
             }
-            else if(button.rarity == 'purple'){
+            else{
+                this.currentXp +=  Math.floor(Math.random()*100+50);
+                this.currentCoins += Math.floor(Math.random()*500*this.currentLevel);
+            }
+        }   
+        else if(button.rarity == 'purple'){
+            if(lootRoll == 0){
                 
                 var newItem = this.createRandomItem(2,3);
                 this.addItem(newItem);
             }
-            
-            
+            else{
+                this.currentXp +=  Math.floor(Math.random()*1000+500);
+                this.currentCoins += Math.floor(Math.random()*5000*this.currentLevel);
+            }
         }
-        
-       
-           
-        
-        
+            
         
         this.lastQuestTime = this.game.time.now;
         this.checkLevelUp();
@@ -425,6 +440,8 @@ mainGame.prototype = {
             this.currentXp -= this.xpToLevel;
             this.currentLevel++;
             this.xpToLevel = this.getXpNeeded(this.currentLevel);
+            this.levelUpSprite.visible = true;
+            this.lastAnimationTime = this.game.time.now;
         }
     },
     
@@ -460,12 +477,13 @@ mainGame.prototype = {
     
     playEpicAnimation: function(){
         this.lastAnimationTime = this.game.time.now;
+        this.epicAnimation.bringToTop();
         this.epicAnimation.visible = true;
         this.epicAnimation.play('shine',20,false);
     },
     
     isAnimationsVisible: function(){
-        if(this.epicAnimation.visible == true)
+        if(this.epicAnimation.visible == true || this.levelUpSprite.visible == true)
             return true;
         else return false;
     },
@@ -478,6 +496,7 @@ mainGame.prototype = {
     
     resetAnimations: function(){
         this.epicAnimation.visible = false;
+        this.levelUpSprite.visible = false;
     },
     
     updateXpDisplay: function(){
@@ -495,14 +514,20 @@ mainGame.prototype = {
     
     randomizeButton: function(button){
         
+        var epicRoll = Math.floor(Math.random()*100+this.getItemLevel());
         var blueRoll = Math.floor(Math.random()*100+this.getItemLevel());
         
-        if(blueRoll > 90){
+        if(epicRoll > 120){
+            var epicIndex = Math.floor(Math.random()*this.N_EPIC_QUESTS);
+            button.key = 'epicQuests';
+            button.rarity = 'purple';
+            button.setFrames( epicIndex, epicIndex, epicIndex);
+        }
+        else if(blueRoll > 90){
             var blueIndex = Math.floor(Math.random()*this.N_BLUE_QUESTS);
             button.key = 'blueQuests';
             button.rarity = 'blue';
             button.setFrames(blueIndex,blueIndex,blueIndex);
-            console.log("Blue!");
         }
         else{
             
