@@ -134,7 +134,7 @@ mainGame.prototype = {
         this.swagTheme = this.game.add.audio('swag');
         
         
-        this.playEpicAnimation();
+       // this.playEpicAnimation();
     },
     
     update: function(){
@@ -486,6 +486,7 @@ mainGame.prototype = {
         this.epicAnimation.bringToTop();
         this.epicAnimation.visible = true;
         this.epicAnimation.play('shine',20,true);
+        
         this.swagTheme.play();
     },
     
@@ -493,7 +494,7 @@ mainGame.prototype = {
        
         
         if(this.levelUpSprite.visible == true && this.game.time.now > this.lastAnimationTime + this.ANIMATION_RESET_TIME){
-            this.levelUpSprite.visibile = false;
+            this.levelUpSprite.visible = false;
         
         }
         
