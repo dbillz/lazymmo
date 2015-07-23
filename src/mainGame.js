@@ -64,6 +64,7 @@ var mainGame = function(game){
     
     this.lastAnimationTime;
     this.ANIMATION_RESET_TIME = 1000;
+    this.EPIC_ANIMATION_RESET_TIME = 11000;
     
     this.xpBar;
     
@@ -72,6 +73,8 @@ var mainGame = function(game){
     this.N_EPIC_QUESTS = 6;
     
     this.levelUpSprite;
+    
+    this.swagTheme;
 }
 
 mainGame.prototype = {
@@ -123,12 +126,15 @@ mainGame.prototype = {
         this.lastAnimationTime = this.game.time.now;
         this.epicAnimation.animations.add('shine');
         
-        //this.playEpicAnimation();
         this.randomizeQuestButtons();
         
         this.levelUpSprite = this.game.add.sprite(50,40,'levelUpSprite');
         this.levelUpSprite.visible = false;
         
+        this.swagTheme = this.game.add.audio('swag');
+        
+        
+        this.playEpicAnimation();
     },
     
     update: function(){
@@ -479,24 +485,21 @@ mainGame.prototype = {
         this.lastAnimationTime = this.game.time.now;
         this.epicAnimation.bringToTop();
         this.epicAnimation.visible = true;
-        this.epicAnimation.play('shine',20,false);
-    },
-    
-    isAnimationsVisible: function(){
-        if(this.epicAnimation.visible == true || this.levelUpSprite.visible == true)
-            return true;
-        else return false;
+        this.epicAnimation.play('shine',20,true);
+        this.swagTheme.play();
     },
     
     checkResetAnimations: function(){
-        if(this.isAnimationsVisible() && this.game.time.now > this.lastAnimationTime + this.ANIMATION_RESET_TIME){
-            this.resetAnimations();
+       
+        
+        if(this.levelUpSprite.visible == true && this.game.time.now > this.lastAnimationTime + this.ANIMATION_RESET_TIME){
+            this.levelUpSprite.visibile = false;
+        
         }
-    },
-    
-    resetAnimations: function(){
-        this.epicAnimation.visible = false;
-        this.levelUpSprite.visible = false;
+        
+        else if(this.epicAnimation.visible == true && this.game.time.now > this.lastAnimationTime + this.EPIC_ANIMATION_RESET_TIME){
+            this.epicAnimation.visible = false;
+        }
     },
     
     updateXpDisplay: function(){

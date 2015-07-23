@@ -31,6 +31,7 @@ preload.prototype = {
         this.game.load.spritesheet('blueQuests','assets/blueQuests200x80.png',200,80);
         this.game.load.spritesheet('epicQuests','assets/epicQuests200x80.png',200,80);
         this.game.load.image('levelUpSprite','assets/levelUp.png');
+        this.game.load.audio('swag',['assets/souljaboy.mp3','assets/souljaboy.ogg']);
         console.log("Loading completed");
     },
     create:function(){
