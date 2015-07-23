@@ -143,6 +143,7 @@ mainGame.prototype = {
         }
         this.checkResetAnimations();
         this.updateXpDisplay();
+        this.epicAnimation.bringToTop();
     },
     
     createPlayer: function(){
@@ -487,6 +488,7 @@ mainGame.prototype = {
         this.epicAnimation.visible = true;
         this.epicAnimation.play('shine',20,true);
         
+        this.swagTheme.stop();
         this.swagTheme.play();
     },
     
